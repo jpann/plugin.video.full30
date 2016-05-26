@@ -22,11 +22,10 @@ def get_channels():
 	channels = full30.get_channels()
 	
 	for channel in channels:
-		list_item = xbmcgui.ListItem(channel['name'],  iconImage='DefaultVideo.png')
+		list_item = xbmcgui.ListItem(channel['name'],  iconImage=channel['thumbnail'])
 		
 		list_item.setInfo('video', {'title': channel['name']})
 		
-		#url = '{0}?action=listing&channel_url={1}'.format(_url, channel['url'])
 		url = '{0}?action=list-video-type&channel_url={1}'.format(_url, channel['url'])
 		
 		is_folder = True
@@ -58,7 +57,7 @@ def list_videos_featured(channel_url):
 	for video in featured_videos:
 		video_url = full30.get_video_mp4(video['url'])
 		
-		list_item = xbmcgui.ListItem(label=video['title'])
+		list_item = xbmcgui.ListItem(label=video['title'], iconImage=video['thumbnail'])
 		
 		list_item.setInfo('video', {'title': video['title'] })
 		 
@@ -76,15 +75,17 @@ def list_videos_featured(channel_url):
 
 	xbmcplugin.endOfDirectory(_handle)
 
-def list_videos_recent(channel_url):
-	featured_videos = full30.get_recent(channel_url)
+def list_videos_recent_pages(channel_url, page = 1):		
+	featured_videos = full30.get_recent_by_page(channel_url, page)
 	
 	listing = []
 	
-	for video in featured_videos:
+	pages = featured_videos['pages']
+
+	for video in featured_videos['videos']:
 		video_url = full30.get_video_mp4(video['url'])
 		
-		list_item = xbmcgui.ListItem(label=video['title'])
+		list_item = xbmcgui.ListItem(label=video['title'], iconImage=video['thumbnail'])
 		
 		list_item.setInfo('video', {'title': video['title'] })
 		 
@@ -98,7 +99,13 @@ def list_videos_recent(channel_url):
 		 
 	xbmcplugin.addDirectoryItems(_handle, listing, len(listing))
 	
-	xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
+	next_page = int(page) + 1
+	if next_page <= pages:
+		list_item = xbmcgui.ListItem(label='Page ' + str(next_page) + ' >>',  iconImage='DefaultVideo.png')
+		
+		url = '{0}?action=listing&type=recent&channel_url={1}&page={2}'.format(_url, channel_url, next_page)
+		
+		xbmcplugin.addDirectoryItem(handle=_handle, url=url, listitem=list_item, isFolder=True)
 
 	xbmcplugin.endOfDirectory(_handle)
 	
@@ -115,7 +122,10 @@ def router(paramstring):
 			if params['type'] == 'featured':
 				list_videos_featured(params['channel_url'])
 			elif params['type'] == 'recent':
-				list_videos_recent(params['channel_url'])
+				if 'page' in params:
+					list_videos_recent_pages(params['channel_url'], params['page'])
+				else:
+					list_videos_recent_pages(params['channel_url'], 1)
 		elif params['action'] == 'list-video-type':
 			list_video_type(params['channel_url'])
 		elif params['action'] == 'play':

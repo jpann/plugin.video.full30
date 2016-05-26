@@ -1,5 +1,6 @@
 import urllib2
 from bs4 import BeautifulSoup
+import requests
 
 class Full30:
     def __init__(self, url):
@@ -8,6 +9,9 @@ class Full30:
         
         self.url = url
         self.channels_url = self.url + "/channels/all"
+        self.video_url = self.url + "/video/{0}"
+        self.api_recent_url = self.url + "/api/v1.0/channel/{0}/recent-videos?page={1}"
+        self.thumbnail_url = self.url + "/cdn/videos/{0}/{1}/thumbnails/320x180_{2}.jpg"
        
     def get_channels(self):
         channels = []
@@ -47,6 +51,41 @@ class Full30:
                 featured.append({ "title" : video_name, "url" : video_url, "thumbnail" : video_thumbnail })
 
         return featured
+    
+    def get_recent_by_page(self, url, page):
+        recent = { 'title' : '', 'slug' : '', 'pages' : '', 'videos' : [] }
+        
+	if not page:
+		page = 1
+	
+	channel_name = url.rsplit('/', 1)[-1]
+	api_url = self.api_recent_url.format(channel_name, page)
+        
+        r = requests.get(api_url, headers={'User-Agent' : 'Mozilla/5.0'})
+        
+        if not r:
+            return None
+            
+        data = r.json()
+        
+        if not data:
+            return None
+            
+        recent['title'] = data['channel']['title']
+        recent['pages'] = data['pages']
+        recent['slug'] = data['channel']['slug']
+        
+        for video in data['videos']:
+            v_hash = video['hashed_identifier']
+            v_id = video['id']
+            v_thumbnail = self.thumbnail_url.format(recent['slug'], v_hash, video['thumbnail_filename'])
+            v_title = video['title']
+            v_url = self.video_url.format(v_hash)
+            v_channel = recent['title']
+            
+            recent['videos'].append({ "title" : v_title, "url" : v_url, "thumbnail" : v_thumbnail, "channel": v_channel})
+        
+        return recent
     
     def get_recent(self, url):
         recent = []
