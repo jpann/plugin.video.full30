@@ -1,0 +1,6 @@
+* 0.0.2
+- Lists featured and recent videos.
+
+* 0.0.1 
+- Inital test.
+- Just lists featured videos.

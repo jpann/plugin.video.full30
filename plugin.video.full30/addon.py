@@ -26,7 +26,8 @@ def get_channels():
 		
 		list_item.setInfo('video', {'title': channel['name']})
 		
-		url = '{0}?action=listing&channel_url={1}'.format(_url, channel['url'])
+		#url = '{0}?action=listing&channel_url={1}'.format(_url, channel['url'])
+		url = '{0}?action=list-video-type&channel_url={1}'.format(_url, channel['url'])
 		
 		is_folder = True
 		
@@ -38,8 +39,45 @@ def get_channels():
 	
 	xbmcplugin.endOfDirectory(_handle)
 
-def list_videos(channel_url):
+def list_video_type(channel_url):
+	list_item = xbmcgui.ListItem(label='Featured',  iconImage='DefaultVideo.png')
+	url = '{0}?action=listing&type=featured&channel_url={1}'.format(_url, channel_url)
+	xbmcplugin.addDirectoryItem(handle=_handle, url=url, listitem=list_item, isFolder=True)
+	
+	list_item = xbmcgui.ListItem(label='Recent',  iconImage='DefaultVideo.png')
+	url = '{0}?action=listing&type=recent&channel_url={1}'.format(_url, channel_url)
+	xbmcplugin.addDirectoryItem(handle=_handle, url=url, listitem=list_item, isFolder=True)
+	
+	xbmcplugin.endOfDirectory(_handle)
+
+def list_videos_featured(channel_url):
 	featured_videos = full30.get_featured(channel_url)
+	
+	listing = []
+	
+	for video in featured_videos:
+		video_url = full30.get_video_mp4(video['url'])
+		
+		list_item = xbmcgui.ListItem(label=video['title'])
+		
+		list_item.setInfo('video', {'title': video['title'] })
+		 
+		list_item.setProperty('IsPlayable', 'true')
+		 
+		url = '{0}?action=play&video={1}'.format(_url, video_url)
+		 
+		is_folder = False
+		 
+		listing.append((url, list_item, is_folder))
+		 
+	xbmcplugin.addDirectoryItems(_handle, listing, len(listing))
+	
+	xbmcplugin.addSortMethod(_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
+
+	xbmcplugin.endOfDirectory(_handle)
+
+def list_videos_recent(channel_url):
+	featured_videos = full30.get_recent(channel_url)
 	
 	listing = []
 	
@@ -74,7 +112,12 @@ def router(paramstring):
 	
 	if params:
 		if params['action'] == 'listing':
-			list_videos(params['channel_url'])
+			if params['type'] == 'featured':
+				list_videos_featured(params['channel_url'])
+			elif params['type'] == 'recent':
+				list_videos_recent(params['channel_url'])
+		elif params['action'] == 'list-video-type':
+			list_video_type(params['channel_url'])
 		elif params['action'] == 'play':
 			play_video(params['video'])
 	else:
