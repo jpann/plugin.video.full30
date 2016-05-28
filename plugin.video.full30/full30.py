@@ -12,6 +12,7 @@ class Full30:
         self.video_url = self.url + "/video/{0}"
         self.api_recent_url = self.url + "/api/v1.0/channel/{0}/recent-videos?page={1}"
         self.thumbnail_url = self.url + "/cdn/videos/{0}/{1}/thumbnails/320x180_{2}.jpg"
+	    self.mp4_url = "https://videos.full30.com/bitmotive/public/full30/v1.0/videos/{0}/{1}/640x360.mp4"
        
     def get_channels(self):
         channels = []
@@ -82,8 +83,9 @@ class Full30:
             v_title = video['title']
             v_url = self.video_url.format(v_hash)
             v_channel = recent['title']
+            v_mp4_url = self.mp4_url.format(recent['slug'], v_hash)
             
-            recent['videos'].append({ "title" : v_title, "url" : v_url, "thumbnail" : v_thumbnail, "channel": v_channel})
+            recent['videos'].append({ "title" : v_title, "url" : v_url, "thumbnail" : v_thumbnail, "channel": v_channel, "mp4_url" : v_mp4_url })
         
         return recent
     

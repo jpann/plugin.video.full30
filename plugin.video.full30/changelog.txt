@@ -1,3 +1,6 @@
+* 0.0.4
+- Don't parse video stream url each time the recent list is loaded.
+
 * 0.0.3
 - Added thumbnails.
 - Added pages for the recent videos.

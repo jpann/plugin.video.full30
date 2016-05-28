@@ -8,7 +8,7 @@ from full30 import Full30
 _url = sys.argv[0]
 _handle = int(sys.argv[1])
 
-xbmcplugin.setContent(_handle, 'movies')
+xbmcplugin.setContent(_handle, 'tvshows')
 
 def build_url(query):
     return base_url + '?' + urllib.urlencode(query)
@@ -83,7 +83,7 @@ def list_videos_recent_pages(channel_url, page = 1):
 	pages = featured_videos['pages']
 
 	for video in featured_videos['videos']:
-		video_url = full30.get_video_mp4(video['url'])
+		video_url = video['mp4_url']
 		
 		list_item = xbmcgui.ListItem(label=video['title'], iconImage=video['thumbnail'])
 		
