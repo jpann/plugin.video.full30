@@ -1,5 +1,8 @@
+* 0.0.5
+- Test fetching channel and video metadata for video listing. Slows loading down a bit though.
+
 * 0.0.4
-- Don't parse video stream url each time the recent list is loaded.
+- Test not parsing out video information with each request.
 
 * 0.0.3
 - Added thumbnails.
